@@ -1,5 +1,4 @@
 import json
-
 import requests
 import config
 
@@ -28,25 +27,48 @@ Known endpoints:
 		https://api.gotinder.com/passport/user/travel
 """
 
-def get_auth_token(fb_auth_token, fb_user_id):
-	url = config.host + '/auth'
-	req = requests.post(url,
-    	headers=headers,
-    	data=json.dumps({'facebook_token': fb_auth_token, 'facebook_id': fb_user_id})
-    	)
-	try:
-		tinder_auth_token = req.json()["token"]
-		headers.update({"X-Auth-Token": tinder_auth_token})
-		return tinder_auth_token
-	except:
-		return {"error": "could not authorize"}
+# def get_auth_token(fb_auth_token, fb_user_id):
+# 	url = config.host + '/auth'
+# 	req = requests.post(url,
+#     	headers=headers,
+#     	data=json.dumps({'facebook_token': fb_auth_token, 'facebook_id': fb_user_id})
+#     	)
+# 	try:
+# 		tinder_auth_token = req.json()["token"]
+# 		headers.update({"X-Auth-Token": tinder_auth_token})
+# 		return tinder_auth_token
+# 	except:
+# 		return {"error": "could not authorize"}
+#
+# print("Getting your Auth Token...")
+# tinder_auth_token = get_auth_token(config.fb_auth_token, config.fb_user_id)
+# if "error" in tinder_auth_token:
+# 	print("Something went wrong!")
+# else:
+# 	print("Success!")
 
-print("Getting your Auth Token...")
-tinder_auth_token = get_auth_token(config.fb_auth_token, config.fb_user_id)
-if "error" in tinder_auth_token: 
-	print("Something went wrong!")
-else:
-	print("Success!")
+def get_auth_token(csv):
+	url = config.host + '/auth'
+	for i in csv:
+		row = readrow()
+		if row[2] == 1:
+			i ++
+		else:
+			fb_auth_token = row[0]
+			fb_user_id = row[1]
+			response = requests.post(url,
+								headers=headers,
+								data=json.dumps({'facebook_token': fb_auth_token, 'facebook_id': fb_user_id})
+								)
+			tinder_auth_token = response.json()["token"]
+			headers.update({"X-Auth-Token": tinder_auth_token})
+			return tinder_auth_token
+			row.rewrite(row[2] = 1)
+			break
+
+
+get_auth_token('accesstokens.csv') # get first available token using accesstokens.csv, update headers , and mark it with 1 (which mean used)
+
 
 # INPUT : None
 # OUTPUT: A dict of the recommended users to swipe on
